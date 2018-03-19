@@ -891,14 +891,14 @@ namespace AtticusServer
         /// <param name="digitals"></param>
         /// <param name="port_digital_IDs"></param>
         /// <param name="usedPortNumbers"></param>
-        private static void groupDigitalChannels(List<int> digitalIDs, List<HardwareChannel> digitals, out Dictionary<int, int[]> port_digital_IDs, out List<int> usedPortNumbers,bool is6533)
+        private static void groupDigitalChannels(List<int> digitalIDs, List<HardwareChannel> digitals, out Dictionary<int, int[]> port_digital_IDs, out List<int> usedPortNumbers, bool is6533, bool is6251)
         {
             List<int> allPorts = new List<int>();
             for (int i = 0; i < 100; i++)
             {
                 allPorts.Add(i);
             }
-            groupDigitalChannels(digitalIDs, digitals,out port_digital_IDs, out usedPortNumbers, is6533, allPorts);
+            groupDigitalChannels(digitalIDs, digitals, out port_digital_IDs, out usedPortNumbers, is6533, is6251, allPorts);
         }
 
         /// <summary>
@@ -909,7 +909,7 @@ namespace AtticusServer
         /// <param name="port_digital_IDs"></param>
         /// <param name="usedPortNumbers"></param>
         /// <param name="allowedPortsToUse"></param>
-        private static void groupDigitalChannels(List<int> digitalIDs, List<HardwareChannel> digitals, out Dictionary<int, int[]> port_digital_IDs, out List<int> usedPortNumbers, bool is6533,List<int> allowedPortsToUse)
+        private static void groupDigitalChannels(List<int> digitalIDs, List<HardwareChannel> digitals, out Dictionary<int, int[]> port_digital_IDs, out List<int> usedPortNumbers, bool is6533, bool is6251, List<int> allowedPortsToUse)
         {
             // Irritating but true fact of life: To make the DAQmx drivers happy 
             // we have to output the digital outputs in 8 bit groups corresponding to 
@@ -933,7 +933,7 @@ namespace AtticusServer
                     {
                         if (allowedPortsToUse.Contains(portNum))
                         {
-                            if (!is6533)
+                            if (!is6533 && !is6251)
                             {
                                 usedPortNumbers.Add(portNum);
                                 // Ports have to be used by pairs for the Daqmx driver to work. If port 0 is used, port 1 has to be used too, and the opposite too, etc...
@@ -942,6 +942,12 @@ namespace AtticusServer
                                 // create the array mapping line number to digital IDs, and fill it with -1s.
                                 port_digital_IDs.Add(portNum, new int[] { -1, -1, -1, -1, -1, -1, -1, -1 });
                                 port_digital_IDs.Add(portNumBis, new int[] { -1, -1, -1, -1, -1, -1, -1, -1 });
+                            }
+                            else if (is6251)
+                            {
+                                usedPortNumbers.Add(0);
+                                port_digital_IDs.Add(0, new int[] { -1, -1, -1, -1, -1, -1, -1, -1 });
+
                             }
                             else
                             {
