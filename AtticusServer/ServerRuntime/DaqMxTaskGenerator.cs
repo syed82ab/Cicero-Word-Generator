@@ -861,9 +861,11 @@ namespace AtticusServer
             // the ID is -1.
 
             if (deviceSettings.DeviceDescription.Contains("6533"))
-            groupDigitalChannels(digitalIDs, digitals, out port_digital_IDs, out usedPortNumbers,true);
+            groupDigitalChannels(digitalIDs, digitals, out port_digital_IDs, out usedPortNumbers,true,false);
+            else if (deviceSettings.DeviceDescription.Contains("6533"))
+                groupDigitalChannels(digitalIDs, digitals, out port_digital_IDs, out usedPortNumbers, false,true);
             else
-            groupDigitalChannels(digitalIDs, digitals, out port_digital_IDs, out usedPortNumbers, false);
+            groupDigitalChannels(digitalIDs, digitals, out port_digital_IDs, out usedPortNumbers, false,false);
 
             //ok! create the channels.
 
