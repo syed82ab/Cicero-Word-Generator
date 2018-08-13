@@ -633,7 +633,7 @@ namespace AtticusServer
 					//First we determine if an analog in task should be created
                     foreach (DeviceSettings ds in AtticusServer.server.serverSettings.myDevicesSettings.Values)
                     {
-                        analogInCardDetected |= (ds.DeviceDescription.Contains("6259") || ds.DeviceDescription.Contains("6363")) && ds.AnalogInEnabled; // program will also support PXIe-6363 cards
+                        analogInCardDetected |= (ds.DeviceDescription.Contains("6259") || ds.DeviceDescription.Contains("6363")  || ds.DeviceDescription.Contains("6361")) && ds.AnalogInEnabled; // program will also support PXIe-6363 cards
                     }
 
                     if (analogInCardDetected)
@@ -2417,6 +2417,10 @@ namespace AtticusServer
 
                     // Special case: 6259 cards use 32-bit wide ports instead of 16 bit wide.
                     if (myDeviceDescriptions[devices[i]].Contains("6259"))
+                    {
+                        serverSettings.myDevicesSettings[devices[i]].use32BitDigitalPorts = true;
+                    }
+                    else if (myDeviceDescriptions[devices[i]].Contains("6361"))
                     {
                         serverSettings.myDevicesSettings[devices[i]].use32BitDigitalPorts = true;
                     }
