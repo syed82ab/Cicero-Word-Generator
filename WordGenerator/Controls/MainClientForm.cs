@@ -1568,5 +1568,10 @@ namespace WordGenerator
             cif.ShowDialog();
         }
 
+        private void variablesEditor_Load(object sender, EventArgs e)
+        {
+
+        }
+
     }
 }

@@ -34,7 +34,6 @@ namespace WordGenerator.Controls
             this.label2 = new System.Windows.Forms.Label();
             this.nameLabel = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
-            this.variableEditorPlaceholder = new WordGenerator.Controls.VariableEditor();
             this.addButton = new System.Windows.Forms.Button();
             this.lockButton = new System.Windows.Forms.Button();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
@@ -62,6 +61,7 @@ namespace WordGenerator.Controls
             this.listFillerButton = new System.Windows.Forms.Button();
             this.listFillerSelector = new System.Windows.Forms.ComboBox();
             this.LockMessage = new System.Windows.Forms.Label();
+            this.variableEditorPlaceholder = new WordGenerator.Controls.VariableEditor();
             this.listEditorPanelPlaceholder = new WordGenerator.Controls.ListEditorPanel();
             this.runControl1 = new WordGenerator.Controls.RunControl();
             this.variablesPanel.SuspendLayout();
@@ -83,7 +83,7 @@ namespace WordGenerator.Controls
             this.variablesPanel.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
             this.variablesPanel.Location = new System.Drawing.Point(3, 0);
             this.variablesPanel.Name = "variablesPanel";
-            this.variablesPanel.Size = new System.Drawing.Size(235, 701);
+            this.variablesPanel.Size = new System.Drawing.Size(235, 457);
             this.variablesPanel.TabIndex = 0;
             // 
             // tableLayoutPanel1
@@ -92,7 +92,7 @@ namespace WordGenerator.Controls
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 32.71028F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 67.28972F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 53F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 103F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 105F));
             this.tableLayoutPanel1.Controls.Add(this.label1, 2, 0);
             this.tableLayoutPanel1.Controls.Add(this.label2, 0, 0);
             this.tableLayoutPanel1.Controls.Add(this.nameLabel, 1, 0);
@@ -107,7 +107,7 @@ namespace WordGenerator.Controls
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(75, 0);
+            this.label1.Location = new System.Drawing.Point(73, 0);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(34, 13);
             this.label1.TabIndex = 1;
@@ -134,20 +134,11 @@ namespace WordGenerator.Controls
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(128, 0);
+            this.label3.Location = new System.Drawing.Point(126, 0);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(55, 13);
             this.label3.TabIndex = 4;
             this.label3.Text = "Equation?";
-            // 
-            // variableEditorPlaceholder
-            // 
-            this.variableEditorPlaceholder.ListLocked = false;
-            this.variableEditorPlaceholder.Location = new System.Drawing.Point(3, 28);
-            this.variableEditorPlaceholder.Name = "variableEditorPlaceholder";
-            this.variableEditorPlaceholder.Size = new System.Drawing.Size(220, 22);
-            this.variableEditorPlaceholder.TabIndex = 2;
-            this.variableEditorPlaceholder.Visible = false;
             // 
             // addButton
             // 
@@ -161,7 +152,7 @@ namespace WordGenerator.Controls
             // 
             // lockButton
             // 
-            this.lockButton.Location = new System.Drawing.Point(910, 765);
+            this.lockButton.Location = new System.Drawing.Point(901, 499);
             this.lockButton.Name = "lockButton";
             this.lockButton.Size = new System.Drawing.Size(157, 72);
             this.lockButton.TabIndex = 3;
@@ -182,7 +173,7 @@ namespace WordGenerator.Controls
             this.groupBox1.Controls.Add(this.runCalLastCheck);
             this.groupBox1.Controls.Add(this.runCalFirstCheck);
             this.groupBox1.Controls.Add(this.calibEnabled);
-            this.groupBox1.Location = new System.Drawing.Point(312, 755);
+            this.groupBox1.Location = new System.Drawing.Point(326, 460);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(353, 135);
             this.groupBox1.TabIndex = 6;
@@ -306,7 +297,7 @@ namespace WordGenerator.Controls
             this.panel1.Controls.Add(this.variablesPanel);
             this.panel1.Location = new System.Drawing.Point(24, 132);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(272, 741);
+            this.panel1.Size = new System.Drawing.Size(272, 463);
             this.panel1.TabIndex = 7;
             // 
             // equationHelpButton
@@ -339,7 +330,7 @@ namespace WordGenerator.Controls
             this.listFiller.Controls.Add(this.listFillerStart);
             this.listFiller.Controls.Add(this.listFillerButton);
             this.listFiller.Controls.Add(this.listFillerSelector);
-            this.listFiller.Location = new System.Drawing.Point(674, 755);
+            this.listFiller.Location = new System.Drawing.Point(685, 461);
             this.listFiller.Name = "listFiller";
             this.listFiller.Size = new System.Drawing.Size(210, 134);
             this.listFiller.TabIndex = 10;
@@ -454,6 +445,15 @@ namespace WordGenerator.Controls
             this.LockMessage.Size = new System.Drawing.Size(0, 13);
             this.LockMessage.TabIndex = 11;
             // 
+            // variableEditorPlaceholder
+            // 
+            this.variableEditorPlaceholder.ListLocked = false;
+            this.variableEditorPlaceholder.Location = new System.Drawing.Point(3, 28);
+            this.variableEditorPlaceholder.Name = "variableEditorPlaceholder";
+            this.variableEditorPlaceholder.Size = new System.Drawing.Size(220, 22);
+            this.variableEditorPlaceholder.TabIndex = 2;
+            this.variableEditorPlaceholder.Visible = false;
+            // 
             // listEditorPanelPlaceholder
             // 
             this.listEditorPanelPlaceholder.Location = new System.Drawing.Point(326, 3);
@@ -465,7 +465,7 @@ namespace WordGenerator.Controls
             // runControl1
             // 
             this.runControl1.IsRunNoSaveEnabled = true;
-            this.runControl1.Location = new System.Drawing.Point(1092, 528);
+            this.runControl1.Location = new System.Drawing.Point(1090, 271);
             this.runControl1.Name = "runControl1";
             this.runControl1.Size = new System.Drawing.Size(119, 300);
             this.runControl1.TabIndex = 5;

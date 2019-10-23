@@ -98,7 +98,7 @@ namespace WordGenerator.Controls
             this.Controls.Add(this.enabledButton);
             this.Controls.Add(this.channelNameLabel);
             this.Name = "GpibGroupChannelSelection";
-            this.Size = new System.Drawing.Size(207, 58);
+            this.Size = new System.Drawing.Size(262, 85);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -112,5 +112,6 @@ namespace WordGenerator.Controls
         private System.Windows.Forms.TextBox rawStringTextBox;
         private System.Windows.Forms.ToolTip toolTip1;
         private System.Windows.Forms.FlowLayoutPanel spsFlowLayoutPanel;
+        //private System.Windows.Forms.Control cpPanel;
     }
 }

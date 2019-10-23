@@ -63,8 +63,8 @@ namespace WordGenerator.Controls
             this.commonWaveformSelector.Name = "commonWaveformSelector";
             this.commonWaveformSelector.Size = new System.Drawing.Size(68, 21);
             this.commonWaveformSelector.TabIndex = 2;
-            this.commonWaveformSelector.SelectedIndexChanged += new System.EventHandler(this.commonWaveformSelector_SelectedIndexChanged);
             this.commonWaveformSelector.DropDown += new System.EventHandler(this.commonWaveformSelector_DropDown);
+            this.commonWaveformSelector.SelectedIndexChanged += new System.EventHandler(this.commonWaveformSelector_SelectedIndexChanged);
             // 
             // GroupChannelSelection
             // 

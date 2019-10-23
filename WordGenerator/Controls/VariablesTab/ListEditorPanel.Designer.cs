@@ -41,7 +41,7 @@ namespace WordGenerator.Controls
             this.textBox1.Location = new System.Drawing.Point(3, 54);
             this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(55, 644);
+            this.textBox1.Size = new System.Drawing.Size(55, 344);
             this.textBox1.TabIndex = 0;
             this.textBox1.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
             // 
@@ -77,7 +77,7 @@ namespace WordGenerator.Controls
             // lineCount
             // 
             this.lineCount.AutoSize = true;
-            this.lineCount.Location = new System.Drawing.Point(3, 727);
+            this.lineCount.Location = new System.Drawing.Point(5, 430);
             this.lineCount.Name = "lineCount";
             this.lineCount.Size = new System.Drawing.Size(35, 13);
             this.lineCount.TabIndex = 4;
@@ -85,7 +85,7 @@ namespace WordGenerator.Controls
             // 
             // shuffleButton
             // 
-            this.shuffleButton.Location = new System.Drawing.Point(3, 701);
+            this.shuffleButton.Location = new System.Drawing.Point(3, 404);
             this.shuffleButton.Name = "shuffleButton";
             this.shuffleButton.Size = new System.Drawing.Size(55, 23);
             this.shuffleButton.TabIndex = 5;
@@ -104,7 +104,7 @@ namespace WordGenerator.Controls
             this.Controls.Add(this.listName);
             this.Controls.Add(this.textBox1);
             this.Name = "ListEditorPanel";
-            this.Size = new System.Drawing.Size(96, 774);
+            this.Size = new System.Drawing.Size(96, 450);
             this.ResumeLayout(false);
             this.PerformLayout();
 

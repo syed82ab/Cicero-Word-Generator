@@ -15,3 +15,7 @@ obj/
 *.pdb
 *.vshost.exe.manifest
 TestResults/
+/.vs/WordGenerator
+/AtticusServer/C
+/AtticusServer/target/Release-DLL/x64
+/AtticusServer/Wrappers/Class1.cs

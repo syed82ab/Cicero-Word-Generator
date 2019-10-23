@@ -104,6 +104,7 @@ namespace WordGenerator
             this.analogTab = new System.Windows.Forms.TabPage();
             this.analogGroupEditor = new WordGenerator.Controls.AnalogGroupEditor();
             this.sequenceTab = new System.Windows.Forms.TabPage();
+            this.useNetworkClockCheckBox = new System.Windows.Forms.CheckBox();
             this.waitForReady = new System.Windows.Forms.CheckBox();
             this.lockDigitalCheckBox = new System.Windows.Forms.CheckBox();
             this.rs232GroupsLabel = new System.Windows.Forms.Label();
@@ -122,7 +123,6 @@ namespace WordGenerator
             this.eventLogTab = new System.Windows.Forms.TabPage();
             this.messageLogTextBox = new System.Windows.Forms.TextBox();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.useNetworkClockCheckBox = new System.Windows.Forms.CheckBox();
             this.statusStrip.SuspendLayout();
             this.menuStrip.SuspendLayout();
             this.variablesTab.SuspendLayout();
@@ -142,7 +142,7 @@ namespace WordGenerator
             this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.settingsFileLabel,
             this.toolStripStatusLabel});
-            this.statusStrip.Location = new System.Drawing.Point(0, 860);
+            this.statusStrip.Location = new System.Drawing.Point(0, 852);
             this.statusStrip.Name = "statusStrip";
             this.statusStrip.Size = new System.Drawing.Size(1272, 22);
             this.statusStrip.TabIndex = 1;
@@ -658,17 +658,22 @@ namespace WordGenerator
             this.variablesTab.Location = new System.Drawing.Point(4, 22);
             this.variablesTab.Name = "variablesTab";
             this.variablesTab.Padding = new System.Windows.Forms.Padding(3);
-            this.variablesTab.Size = new System.Drawing.Size(1264, 810);
+            this.variablesTab.Size = new System.Drawing.Size(1264, 802);
             this.variablesTab.TabIndex = 4;
             this.variablesTab.Text = "Variables (F7)";
             this.variablesTab.UseVisualStyleBackColor = true;
             // 
             // variablesEditor
             // 
+            this.variablesEditor.AutoScroll = true;
+            this.variablesEditor.AutoSize = true;
+            this.variablesEditor.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.variablesEditor.AutoValidate = System.Windows.Forms.AutoValidate.EnablePreventFocusChange;
             this.variablesEditor.Location = new System.Drawing.Point(0, 0);
             this.variablesEditor.Name = "variablesEditor";
-            this.variablesEditor.Size = new System.Drawing.Size(1264, 918);
+            this.variablesEditor.Size = new System.Drawing.Size(1298, 911);
             this.variablesEditor.TabIndex = 0;
+            this.variablesEditor.Load += new System.EventHandler(this.variablesEditor_Load);
             // 
             // commonWaveformTab
             // 
@@ -676,7 +681,7 @@ namespace WordGenerator
             this.commonWaveformTab.Location = new System.Drawing.Point(4, 22);
             this.commonWaveformTab.Name = "commonWaveformTab";
             this.commonWaveformTab.Padding = new System.Windows.Forms.Padding(3);
-            this.commonWaveformTab.Size = new System.Drawing.Size(1264, 810);
+            this.commonWaveformTab.Size = new System.Drawing.Size(1264, 802);
             this.commonWaveformTab.TabIndex = 3;
             this.commonWaveformTab.Text = "Common Waveform (F6)";
             this.commonWaveformTab.UseVisualStyleBackColor = true;
@@ -694,7 +699,7 @@ namespace WordGenerator
             this.gpibTab.Location = new System.Drawing.Point(4, 22);
             this.gpibTab.Name = "gpibTab";
             this.gpibTab.Padding = new System.Windows.Forms.Padding(3);
-            this.gpibTab.Size = new System.Drawing.Size(1264, 810);
+            this.gpibTab.Size = new System.Drawing.Size(1264, 802);
             this.gpibTab.TabIndex = 2;
             this.gpibTab.Text = "GPIB (F4)";
             this.gpibTab.UseVisualStyleBackColor = true;
@@ -704,7 +709,7 @@ namespace WordGenerator
             this.gpibGroupEditor.Dock = System.Windows.Forms.DockStyle.Fill;
             this.gpibGroupEditor.Location = new System.Drawing.Point(3, 3);
             this.gpibGroupEditor.Name = "gpibGroupEditor";
-            this.gpibGroupEditor.Size = new System.Drawing.Size(1258, 890);
+            this.gpibGroupEditor.Size = new System.Drawing.Size(1258, 796);
             this.gpibGroupEditor.TabIndex = 0;
             // 
             // analogTab
@@ -713,7 +718,7 @@ namespace WordGenerator
             this.analogTab.Location = new System.Drawing.Point(4, 22);
             this.analogTab.Name = "analogTab";
             this.analogTab.Padding = new System.Windows.Forms.Padding(3);
-            this.analogTab.Size = new System.Drawing.Size(1264, 810);
+            this.analogTab.Size = new System.Drawing.Size(1264, 802);
             this.analogTab.TabIndex = 1;
             this.analogTab.Text = "Analog (F3)";
             this.analogTab.UseVisualStyleBackColor = true;
@@ -723,7 +728,7 @@ namespace WordGenerator
             this.analogGroupEditor.Dock = System.Windows.Forms.DockStyle.Fill;
             this.analogGroupEditor.Location = new System.Drawing.Point(3, 3);
             this.analogGroupEditor.Name = "analogGroupEditor";
-            this.analogGroupEditor.Size = new System.Drawing.Size(1258, 890);
+            this.analogGroupEditor.Size = new System.Drawing.Size(1258, 796);
             this.analogGroupEditor.TabIndex = 0;
             // 
             // sequenceTab
@@ -740,11 +745,22 @@ namespace WordGenerator
             this.sequenceTab.Location = new System.Drawing.Point(4, 22);
             this.sequenceTab.Name = "sequenceTab";
             this.sequenceTab.Padding = new System.Windows.Forms.Padding(3);
-            this.sequenceTab.Size = new System.Drawing.Size(1264, 810);
+            this.sequenceTab.Size = new System.Drawing.Size(1264, 802);
             this.sequenceTab.TabIndex = 0;
             this.sequenceTab.Text = "Sequence (F1)";
             this.sequenceTab.ToolTipText = "Testing";
             this.sequenceTab.UseVisualStyleBackColor = true;
+            // 
+            // useNetworkClockCheckBox
+            // 
+            this.useNetworkClockCheckBox.AutoSize = true;
+            this.useNetworkClockCheckBox.Location = new System.Drawing.Point(7, 768);
+            this.useNetworkClockCheckBox.Name = "useNetworkClockCheckBox";
+            this.useNetworkClockCheckBox.Size = new System.Drawing.Size(118, 17);
+            this.useNetworkClockCheckBox.TabIndex = 10;
+            this.useNetworkClockCheckBox.Text = "Use Network Clock";
+            this.useNetworkClockCheckBox.UseVisualStyleBackColor = true;
+            this.useNetworkClockCheckBox.CheckedChanged += new System.EventHandler(this.useNetworkClockCheckbox_CheckedChanged);
             // 
             // waitForReady
             // 
@@ -819,9 +835,9 @@ namespace WordGenerator
             this.sequencePage.Dock = System.Windows.Forms.DockStyle.Fill;
             this.sequencePage.Location = new System.Drawing.Point(3, 3);
             this.sequencePage.Name = "sequencePage";
-            this.sequencePage.Size = new System.Drawing.Size(1258, 804);
+            this.sequencePage.Size = new System.Drawing.Size(1258, 796);
             this.sequencePage.TabIndex = 0;
-            this.sequencePage.messageLog += new System.EventHandler<DataStructures.MessageEvent> (this.handleMessageEvent);
+            this.sequencePage.messageLog += new System.EventHandler<DataStructures.MessageEvent>(this.handleMessageEvent);
             // 
             // mainTab
             // 
@@ -838,7 +854,7 @@ namespace WordGenerator
             this.mainTab.Location = new System.Drawing.Point(0, 24);
             this.mainTab.Name = "mainTab";
             this.mainTab.SelectedIndex = 0;
-            this.mainTab.Size = new System.Drawing.Size(1272, 836);
+            this.mainTab.Size = new System.Drawing.Size(1272, 828);
             this.mainTab.TabIndex = 2;
             // 
             // overrideTab
@@ -846,7 +862,7 @@ namespace WordGenerator
             this.overrideTab.Controls.Add(this.overridePage);
             this.overrideTab.Location = new System.Drawing.Point(4, 22);
             this.overrideTab.Name = "overrideTab";
-            this.overrideTab.Size = new System.Drawing.Size(1264, 810);
+            this.overrideTab.Size = new System.Drawing.Size(1264, 802);
             this.overrideTab.TabIndex = 7;
             this.overrideTab.Text = "Override (F2)";
             this.overrideTab.UseVisualStyleBackColor = true;
@@ -856,7 +872,7 @@ namespace WordGenerator
             this.overridePage.Dock = System.Windows.Forms.DockStyle.Fill;
             this.overridePage.Location = new System.Drawing.Point(0, 0);
             this.overridePage.Name = "overridePage";
-            this.overridePage.Size = new System.Drawing.Size(1264, 896);
+            this.overridePage.Size = new System.Drawing.Size(1264, 802);
             this.overridePage.TabIndex = 0;
             // 
             // rs232Tab
@@ -864,7 +880,7 @@ namespace WordGenerator
             this.rs232Tab.Controls.Add(this.rS232GroupEditor);
             this.rs232Tab.Location = new System.Drawing.Point(4, 22);
             this.rs232Tab.Name = "rs232Tab";
-            this.rs232Tab.Size = new System.Drawing.Size(1264, 810);
+            this.rs232Tab.Size = new System.Drawing.Size(1264, 802);
             this.rs232Tab.TabIndex = 5;
             this.rs232Tab.Text = "RS232 (F5)";
             this.rs232Tab.UseVisualStyleBackColor = true;
@@ -881,7 +897,7 @@ namespace WordGenerator
             this.pulsesTab.Controls.Add(this.pulsesPage);
             this.pulsesTab.Location = new System.Drawing.Point(4, 22);
             this.pulsesTab.Name = "pulsesTab";
-            this.pulsesTab.Size = new System.Drawing.Size(1264, 810);
+            this.pulsesTab.Size = new System.Drawing.Size(1264, 802);
             this.pulsesTab.TabIndex = 8;
             this.pulsesTab.Text = "Pulses (F8)";
             this.pulsesTab.UseVisualStyleBackColor = true;
@@ -891,7 +907,7 @@ namespace WordGenerator
             this.pulsesPage.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pulsesPage.Location = new System.Drawing.Point(0, 0);
             this.pulsesPage.Name = "pulsesPage";
-            this.pulsesPage.Size = new System.Drawing.Size(1264, 896);
+            this.pulsesPage.Size = new System.Drawing.Size(1264, 802);
             this.pulsesPage.TabIndex = 0;
             // 
             // eventLogTab
@@ -899,7 +915,7 @@ namespace WordGenerator
             this.eventLogTab.Controls.Add(this.messageLogTextBox);
             this.eventLogTab.Location = new System.Drawing.Point(4, 22);
             this.eventLogTab.Name = "eventLogTab";
-            this.eventLogTab.Size = new System.Drawing.Size(1264, 810);
+            this.eventLogTab.Size = new System.Drawing.Size(1264, 802);
             this.eventLogTab.TabIndex = 6;
             this.eventLogTab.Text = "Event Log";
             this.eventLogTab.UseVisualStyleBackColor = true;
@@ -920,22 +936,11 @@ namespace WordGenerator
             this.toolTip1.UseAnimation = false;
             this.toolTip1.UseFading = false;
             // 
-            // useNetworkClockCheckBox
-            // 
-            this.useNetworkClockCheckBox.AutoSize = true;
-            this.useNetworkClockCheckBox.Location = new System.Drawing.Point(7, 768);
-            this.useNetworkClockCheckBox.Name = "useNetworkClockCheckBox";
-            this.useNetworkClockCheckBox.Size = new System.Drawing.Size(118, 17);
-            this.useNetworkClockCheckBox.TabIndex = 10;
-            this.useNetworkClockCheckBox.Text = "Use Network Clock";
-            this.useNetworkClockCheckBox.UseVisualStyleBackColor = true;
-            this.useNetworkClockCheckBox.CheckedChanged += new System.EventHandler(this.useNetworkClockCheckbox_CheckedChanged);
-            // 
             // MainClientForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1272, 882);
+            this.ClientSize = new System.Drawing.Size(1272, 874);
             this.Controls.Add(this.mainTab);
             this.Controls.Add(this.statusStrip);
             this.Controls.Add(this.menuStrip);
@@ -953,6 +958,7 @@ namespace WordGenerator
             this.menuStrip.ResumeLayout(false);
             this.menuStrip.PerformLayout();
             this.variablesTab.ResumeLayout(false);
+            this.variablesTab.PerformLayout();
             this.commonWaveformTab.ResumeLayout(false);
             this.gpibTab.ResumeLayout(false);
             this.analogTab.ResumeLayout(false);
