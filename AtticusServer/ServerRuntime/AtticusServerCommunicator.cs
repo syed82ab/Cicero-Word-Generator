@@ -15,8 +15,7 @@ using System.Globalization;
 using System.IO;
 using System.Reflection;
 using DataStructures.UtilityClasses;
-
-
+using System.Runtime.InteropServices;
 
 namespace AtticusServer
 {
@@ -25,6 +24,12 @@ namespace AtticusServer
     public class AtticusServerCommunicator : ServerCommunicator
     {
 
+        public IntPtr conn;
+       
+        
+      
+        public double val;
+        
         private void displayError()
         {
             if (MainServerForm.instance != null)
@@ -166,12 +171,13 @@ namespace AtticusServer
         /// resides on this server. Populated in findMyChannels.
         /// </summary>
         private Dictionary<int, HardwareChannel> usedDigitalChannels;
-
+        private Dictionary<int, HardwareChannel> emptyDigitalChannels;
         /// <summary>
         /// Contains one entry for each logical ID - HardwareChannel pair which was found in settings data and which
         /// resides on this server. Populated in findMyChannels.
         /// </summary>
         private Dictionary<int, HardwareChannel> usedAnalogChannels;
+        private Dictionary<int, HardwareChannel> emptyAnalogChannels;
 
         /// <summary>
         /// List of the string identifiers of the DaqMx devices that are used in the next run. Populated in findMyChannels.
@@ -817,6 +823,19 @@ namespace AtticusServer
                                     rfsgTasks.Add(gpibChannel, rftask);
                                     messageLog(this, new MessageEvent("Done."));
                                     break;
+                                case HardwareChannel.GpibMasqueradeType.ZIHF:
+                                    messageLog(this, new MessageEvent("Generating ZIHF buffer for gpib ID " + gpibID));
+                                    //RfsgTask rftask = new RfsgTask(sequence, settings, gpibID, gpibChannel.DeviceName, serverSettings.myDevicesSettings[gpibChannel.DeviceName]);
+                                    //rftask.Done += new TaskDoneEventHandler(aTaskFinished);
+                                    //rfsgTasks.Add(gpibChannel, rftask);
+                                    //AtticusServer.server.messageLog(this, new MessageEvent("this is just a test" + sequence, 1, MessageEvent.MessageTypes.Log, MessageEvent.MessageCategories.RFSG));
+                                    RfsgTask zitask = new RfsgTask(sequence, settings, gpibID, gpibChannel.DeviceName, serverSettings.myDevicesSettings[gpibChannel.DeviceName]);
+                                    zitask.Done += new TaskDoneEventHandler(aTaskFinished);
+                                    rfsgTasks.Add(gpibChannel, zitask);
+                                    messageLog(this, new MessageEvent("Done."));
+                                    break;
+
+
                             }
                         }
                     }
@@ -1209,12 +1228,15 @@ namespace AtticusServer
 
             if (deviceSettings.DeviceEnabled)
             {
+
                 if (deviceHasUsedChannels(dev))
                 {
                     long expectedGenerated = 0;
-
+                    
+                    
                     messageLog(this, new MessageEvent("Generating buffer for " + dev));
-                    Task task = DaqMxTaskGenerator.createDaqMxTask(dev,
+                   
+                    Task taska = DaqMxTaskGenerator.createDaqMxTask(dev,
                         deviceSettings,
                         sequence,
                         settings,
@@ -1223,15 +1245,17 @@ namespace AtticusServer
                         serverSettings,
                         out expectedGenerated);
 
-                    task.Done += new TaskDoneEventHandler(aTaskFinished);
+                    taska.Done += new TaskDoneEventHandler(aTaskFinished);
 
-                    daqMxTasks.Add(dev, task);
-                    messageLog(this, new MessageEvent("Buffer for " + dev + " generated. " + task.Stream.Buffer.OutputBufferSize + " samples per channel. On board buffer size " + task.Stream.Buffer.OutputOnBoardBufferSize + " samples per channel."));
+                    daqMxTasks.Add(dev, taska);
+                    messageLog(this, new MessageEvent("Buffer for " + dev + " generated. " + taska.Stream.Buffer.OutputBufferSize + " samples per channel. On board buffer size " + taska.Stream.Buffer.OutputOnBoardBufferSize + " samples per channel."));
 
                     if (expectedGenerated != 0)
                     {
                         expectedNumberOfSamplesGenerated.Add(dev, expectedGenerated);
                     }
+					
+                    
                 }
                 else
                 {
@@ -1338,6 +1362,28 @@ namespace AtticusServer
                                         messageLog(this, new MessageEvent("Wrote GPIB data : " + sps.ToString()));
                                     }
                                 }
+                            }
+                            else if (channelData.DataType == GPIBGroupChannelData.GpibChannelDataType.setpoint)
+                            {
+                                
+                                
+                              
+                                string str="";
+                                foreach (StringParameterString sps in channelData.StringParameterStrings)
+                                    str = sps.ToString();
+
+                                val = Convert.ToDouble(str);
+                                //CallziInit(ref conn);
+                                //CallziConnect(conn);
+                                //CallziSetValueD(conn, val);
+
+                                //messageLog(this, new MessageEvent("Wrote setpoint data : " + val));
+                                //CallziDisconnect(conn);
+                                //CallziDestroy(conn);
+
+                                CallSetPtPID(val);
+                                messageLog(this, new MessageEvent("Wrote GPIB data : " + str));
+
                             }
                             else
                             {
@@ -2193,6 +2239,8 @@ namespace AtticusServer
             this.usedDigitalChannels = new Dictionary<int, HardwareChannel>();
             this.usedGpibChannels = new Dictionary<int, HardwareChannel>();
             this.usedRS232Channels = new Dictionary<int, HardwareChannel>();
+			this.emptyAnalogChannels = new Dictionary<int, HardwareChannel>();
+			this.emptyDigitalChannels = new Dictionary<int, HardwareChannel>();
 
             LogicalChannel errorChan;
             //analog
@@ -2420,10 +2468,6 @@ namespace AtticusServer
                     {
                         serverSettings.myDevicesSettings[devices[i]].use32BitDigitalPorts = true;
                     }
-                    else if (myDeviceDescriptions[devices[i]].Contains("6361"))
-                    {
-                        serverSettings.myDevicesSettings[devices[i]].use32BitDigitalPorts = true;
-                    }
 
 
                     // Add all the analog channels, but only if the device settings say this card is enabled
@@ -2471,20 +2515,43 @@ namespace AtticusServer
 
                     System.Console.WriteLine("Querying RFSG devices...");
 
-                    string devName = rfsgDevName.DeviceName;
-                    HardwareChannel hc = new HardwareChannel(serverSettings.ServerName, devName, "rf_out", HardwareChannel.HardwareConstants.ChannelTypes.gpib);
-                    hc.gpibMasquerade = true;
-                    hc.myGpibMasqueradeType = HardwareChannel.GpibMasqueradeType.RFSG;
-
-                    myHardwareChannels.Add(hc);
-
-                    if (!serverSettings.myDevicesSettings.ContainsKey(devName))
+                    if (rfsgDevName.DeviceName == "RF1")
                     {
-                        DeviceSettings devSettings = new DeviceSettings(devName, "RFSG driver library signal generator");
-                        serverSettings.myDevicesSettings.Add(devName, devSettings);
-                    }
+                        string devName = rfsgDevName.DeviceName;
+                        HardwareChannel hc = new HardwareChannel(serverSettings.ServerName, devName, "rf_out", HardwareChannel.HardwareConstants.ChannelTypes.gpib);
+                        hc.gpibMasquerade = true;
+                        hc.myGpibMasqueradeType = HardwareChannel.GpibMasqueradeType.RFSG;
 
+                        myHardwareChannels.Add(hc);
+
+                        if (!serverSettings.myDevicesSettings.ContainsKey(devName))
+                        {
+                            DeviceSettings devSettings = new DeviceSettings(devName, "RFSG driver library signal generator");
+                            serverSettings.myDevicesSettings.Add(devName, devSettings);
+                        }
+                    }
                     System.Console.WriteLine("...done.");
+
+                    System.Console.WriteLine("Querying ZIHF devices...");
+                    if (rfsgDevName.DeviceName == "dev574")
+                    {
+                        string devName2 = rfsgDevName.DeviceName;
+                        HardwareChannel hc2 = new HardwareChannel(serverSettings.ServerName, devName2, "zi_hf2", HardwareChannel.HardwareConstants.ChannelTypes.gpib);
+
+                        hc2.gpibMasquerade = true;
+                        hc2.myGpibMasqueradeType = HardwareChannel.GpibMasqueradeType.ZIHF;
+
+                        MyHardwareChannels.Add(hc2);
+
+                        if(!serverSettings.myDevicesSettings.ContainsKey(devName2))
+                        {
+                            DeviceSettings deviceSettings = new DeviceSettings(devName2, "ZiHF driver library");
+                            serverSettings.myDevicesSettings.Add(devName2, deviceSettings);
+                        }
+
+                    }
+                    System.Console.WriteLine("...done.");
+                    
 
                 }
 
@@ -2576,13 +2643,15 @@ namespace AtticusServer
                             }
                         }
                     }
-                    catch (Exception)
+                    catch (Exception)       
                     {
                         // throw e;
                     }
 
                     System.Console.WriteLine("...done.");
-
+                    //ZIDoubleData value;
+                    //value.value = 0.002;
+                    //CallSetPtPID(value);
                 }
 
                 /*
@@ -2904,5 +2973,52 @@ namespace AtticusServer
 
 
         #endregion
+
+        [DllImport("setpointPID0.dll")]
+        public static extern void SetPtPID(double value);
+
+        public static void CallSetPtPID(double value)
+        {
+            SetPtPID(value);
+        }
+        [DllImport("setpointPID1.dll")]
+        public static extern int ziInit(ref IntPtr conn);
+
+        public static int CallziInit(ref IntPtr conn)
+        {
+            int output;
+            output=ziInit(ref conn);
+            return output;
+        }
+        [DllImport("setpointPID1.dll")]
+        public static extern int ziConnect(IntPtr conn);
+        public static int CallziConnect(IntPtr conn)
+        {
+            int output;
+            output = ziConnect(conn);
+            return output;
+        }
+        [DllImport("setpointPID1.dll")]
+        public static extern int ziSetValueD(IntPtr conn, double value);
+        public static int CallziSetValueD(IntPtr conn,double value)
+        {
+            int output;
+            output = ziSetValueD(conn,value);
+            return output;
+        }
+        [DllImport("setpointPID1.dll")]
+        public static extern void ziDisconnect(IntPtr conn);
+        public static void CallziDisconnect(IntPtr conn)
+        {
+            ziDisconnect(conn);
+            return;
+        }
+        [DllImport("setpointPID1.dll")]
+        public static extern void ziDestroy(IntPtr conn);
+        public static void CallziDestroy(IntPtr conn)
+        {
+            ziDestroy(conn);
+            return;
+        }
     }
 }

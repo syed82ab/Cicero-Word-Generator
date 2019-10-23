@@ -22,7 +22,7 @@ namespace DataStructures
         /// </summary>
         public bool gpibMasquerade;
 
-        public enum GpibMasqueradeType { NONE, RFSG };
+        public enum GpibMasqueradeType { NONE, RFSG, ZIHF };
         public GpibMasqueradeType myGpibMasqueradeType;
 
         public static readonly HardwareChannel Unassigned = HardwareChannel.createUnassignedHC();

@@ -225,8 +225,19 @@ namespace AtticusServer
                        }
                    }
                }
+                //else if (channelData.DataType == GPIBGroupChannelData.GpibChannelDataType.setpoint)
+                //{
+                //    if (channelData.StringParameterStrings != null)
+                //    {
+                //        foreach (StringParameterString sps in channelData.StringParameterStrings)
+                //        {
+                //            string commandWithCorrectNewlines = AddNewlineCharacters(sps.ToString());
+                //            commandBuffer.Add(new GpibCommand(commandWithCorrectNewlines, currentTime + postTime));
+                //        }
+                //    }
+                //}
 
-               currentTime += Shared.SecondsToTicks(currentStep.StepDuration.getBaseValue());            
+                currentTime += Shared.SecondsToTicks(currentStep.StepDuration.getBaseValue());            
            }
 
            return true;

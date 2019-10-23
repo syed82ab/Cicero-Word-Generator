@@ -4,6 +4,9 @@ using System.Text;
 using DataStructures;
 using InstrumentDriverInterop.Ivi;
 using System.Threading;
+using System.Runtime.InteropServices;
+
+
 
 namespace AtticusServer
 {
@@ -13,27 +16,35 @@ namespace AtticusServer
         private static Dictionary<niRFSG, bool> rfsgDeviceInitiated;
         private niRFSG rfsgDevice;
         private List<RFSGCommand> commandBuffer;
+        private static Dictionary<string, ziHF> ziHFs;
+        private static Dictionary<ziHF, bool> ziHFInitiated;
+        private ziHF ziHF;
         public event NationalInstruments.DAQmx.TaskDoneEventHandler Done;
         int currentCommand = 0;
         long taskStartTime;
         int channelID;
-        
 
+      
+        public IntPtr ziconn;
         private struct RFSGCommand
         {
-            public enum CommandType { AmplitudeFrequency, EnableOutput, DisableOutput, Initiate, Abort };
+            public enum CommandType { AmplitudeFrequency, EnableOutput, DisableOutput, Initiate, Abort, SetPIDSetPt };
             public CommandType commandType;
 
             public double frequency;
             public double amplitude;
-
+            public double volt;
+                
             /// <summary>
             /// time, in ticks (100ns intervals. 10 ticks = 1us. 10000 = 1ms) at which command is to be output, relative to
             /// sequence start
             /// </summary>
             public long commandTime;
-        
+
+
         }
+
+
 
         double Vpp_to_dBm(double vpp)
         {
@@ -85,7 +96,7 @@ namespace AtticusServer
                 commandBuffer.Add(com);
             }
 
-            long postRetriggerTime = 100; // corresponds to 10us.
+            long postRetriggerTime = 0; // corresponds to 10us.
             // A workaround to issue when using software timed groups in 
             // fpga-retriggered words
 
@@ -208,45 +219,104 @@ namespace AtticusServer
                             com.commandType = RFSGCommand.CommandType.Initiate;
                             com.commandTime = currentTime + postTime;
                             commandBuffer.Add(com);
-                        }       
+                        }
                     }
+                }
+                else if (channelData.DataType == GPIBGroupChannelData.GpibChannelDataType.setpoint)
+                {
+                    
+                    if (channelData.StringParameterStrings != null)
+                    {
+                        string str ="";
+                        foreach (StringParameterString sps in channelData.StringParameterStrings)
+                            str = sps.ToString();
+
+                        RFSGCommand com = new RFSGCommand();
+                        com.commandType = RFSGCommand.CommandType.SetPIDSetPt;
+                        com.volt = Convert.ToDouble(str);
+                        com.commandTime = currentTime + postTime;
+                        commandBuffer.Add(com);
+                        
+                    }
+                    //com.commandTime = currentTime + postTime;
+                    //commandBuffer.Add(com);
+
                 }
 
                 currentTime += seconds_to_ticks(currentStep.StepDuration.getBaseValue());
             }
 
-
-            if (rfsgDevices == null)
+            if (rfsgDeviceName == "dev574")
             {
-                rfsgDevices = new Dictionary<string, niRFSG>();
-                rfsgDeviceInitiated = new Dictionary<niRFSG, bool>();
-            }
+                if (ziHFs == null)
+                {
+                    AtticusServer.server.messageLog(this, new MessageEvent("ziHFDevice ws null", 1, MessageEvent.MessageTypes.Log, MessageEvent.MessageCategories.RFSG));
+                    ziHFs = new Dictionary<string, ziHF>();
+                    ziHFInitiated = new Dictionary<ziHF, bool>();
+                }
+                if (ziHFs.ContainsKey(rfsgDeviceName))
+                {
+                    AtticusServer.server.messageLog(this, new MessageEvent("rfsgDevices contains key rfsgdevicename", 1, MessageEvent.MessageTypes.Log, MessageEvent.MessageCategories.RFSG));
+                    ziHF = ziHFs[rfsgDeviceName];
 
-            if (rfsgDevices.ContainsKey(rfsgDeviceName))
-            {
-                rfsgDevice = rfsgDevices[rfsgDeviceName];
+                }
+                else
+                {
+
+                    try
+                    {
+                        
+                        ziHF = new ziHF(ref ziconn);
+                        int retval = ziHF.Connect(ziconn);
+                        AtticusServer.server.messageLog(this, new MessageEvent("tried to initialise. return value is "+ retval, 1, MessageEvent.MessageTypes.Log, MessageEvent.MessageCategories.RFSG));
+                    }
+                    catch (Exception e)
+                    {
+                        throw new InvalidDataException("Caught exception when attempting to instantiate an zi device named " + rfsgDeviceName + ". Maybe a device by this name does not exist? Exception message: " + e.Message);
+                    }
+                    ziHFs.Add(rfsgDeviceName, ziHF);
+                    ziHFInitiated.Add(ziHF, false);
+                }
             }
             else
             {
-
-                try
+                if (rfsgDevices == null)
                 {
-                    rfsgDevice = new niRFSG(rfsgDeviceName, true, false);
+                    AtticusServer.server.messageLog(this, new MessageEvent("rfsgDevices was null", 1, MessageEvent.MessageTypes.Log, MessageEvent.MessageCategories.RFSG));
+                    rfsgDevices = new Dictionary<string, niRFSG>();
+                    rfsgDeviceInitiated = new Dictionary<niRFSG, bool>();
                 }
-                catch (Exception e)
+
+                AtticusServer.server.messageLog(this, new MessageEvent("The condition has" + rfsgDevices.ContainsKey(rfsgDeviceName), 1, MessageEvent.MessageTypes.Log, MessageEvent.MessageCategories.RFSG));
+
+                if (rfsgDevices.ContainsKey(rfsgDeviceName))
                 {
-                    throw new InvalidDataException("Caught exception when attempting to instantiate an rfsg device named " + rfsgDeviceName + ". Maybe a device by this name does not exist? Exception message: " + e.Message);
+                    AtticusServer.server.messageLog(this, new MessageEvent("rfsgDevices contains key rfsgdevicename", 1, MessageEvent.MessageTypes.Log, MessageEvent.MessageCategories.RFSG));
+                    rfsgDevice = rfsgDevices[rfsgDeviceName];
+
                 }
-                rfsgDevices.Add(rfsgDeviceName, rfsgDevice);
-                rfsgDeviceInitiated.Add(rfsgDevice, false);
-            }
+                else
+                {
+
+                    try
+                    {
+                        AtticusServer.server.messageLog(this, new MessageEvent("tried", 1, MessageEvent.MessageTypes.Log, MessageEvent.MessageCategories.RFSG));
+                        rfsgDevice = new niRFSG(rfsgDeviceName, true, false);
+                    }
+                    catch (Exception e)
+                    {
+                        throw new InvalidDataException("Caught exception when attempting to instantiate an rfsg device named " + rfsgDeviceName + ". Maybe a device by this name does not exist? Exception message: " + e.Message);
+                    }
+                    rfsgDevices.Add(rfsgDeviceName, rfsgDevice);
+                    rfsgDeviceInitiated.Add(rfsgDevice, false);
+                }
 
 
-            if (deviceSettings.MasterTimebaseSource != null && deviceSettings.MasterTimebaseSource != "")
-            {
-                rfsgDevice.ConfigureRefClock(deviceSettings.MasterTimebaseSource, 10000000);
+                if (deviceSettings.MasterTimebaseSource != null && deviceSettings.MasterTimebaseSource != "")
+                {
+                    rfsgDevice.ConfigureRefClock(deviceSettings.MasterTimebaseSource, 10000000);
+                }
             }
-        
         }
 
 
@@ -263,6 +333,8 @@ namespace AtticusServer
         /// <summary>
         /// This function is copied from GPIBTask, with small modifications.
         /// </summary>
+        
+            
         public bool runTick(uint elasped_ms)
         {
             //try
@@ -272,6 +344,9 @@ namespace AtticusServer
 
             if (currentCommand >= commandBuffer.Count)
             {
+                ziHF.Destroy(ziconn);
+                ziHFs.Clear();
+                ziHFInitiated.Clear();
                 if (this.Done != null)
                 {
                     this.Done(this, new NationalInstruments.DAQmx.TaskDoneEventArgs(null));
@@ -288,6 +363,9 @@ namespace AtticusServer
 
                     if (this.Done != null)
                     {
+                        ziHF.Destroy(ziconn);
+                        ziHFs.Clear();
+                        ziHFInitiated.Clear();
                         this.Done(this, new NationalInstruments.DAQmx.TaskDoneEventArgs(null));
                     }
                     return false;
@@ -332,6 +410,40 @@ namespace AtticusServer
 
                     AtticusServer.server.messageLog(this, new MessageEvent("RFSG commanded to frequence(Hz)/amplitude(dBm) " + command.frequency + "/" + command.amplitude, 1, MessageEvent.MessageTypes.Log, MessageEvent.MessageCategories.RFSG));
 
+                    break;
+                case RFSGCommand.CommandType.SetPIDSetPt:
+                    try
+                    {
+                        double val = command.volt;
+                        unsafe { 
+                        Console.WriteLine("ziconn is {0}", ziconn);
+                    }
+
+                        int retval = ziHF.SyncSetD(ziconn, val);
+                        if (retval == 0)
+                        {
+                            AtticusServer.server.messageLog(this, new MessageEvent("Wrote setpoint data : " + val));
+                            AtticusServer.server.messageLog(this, new MessageEvent("ZIHF2 commanded to set voltage " + command.volt, 1, MessageEvent.MessageTypes.Log, MessageEvent.MessageCategories.RFSG));
+                        }
+                        else
+                        {
+                            
+                            AtticusServer.server.messageLog(this, new MessageEvent("Error setting set voltage " + command.volt + ". Trying again.", 1, MessageEvent.MessageTypes.Log, MessageEvent.MessageCategories.RFSG));
+                            retval = ziHF.SyncSetD(ziconn, val);
+                            Console.WriteLine("Return value after second set is {0}" , retval);
+                        }
+
+                    }
+                    catch (Exception e)
+                    {
+                        AtticusServer.server.messageLog(this, new MessageEvent("Exception", 1, MessageEvent.MessageTypes.Log, MessageEvent.MessageCategories.RFSG));
+
+                        if (success)
+                            AtticusServer.server.messageLog(this, new MessageEvent("ZIHF commanded to set voltage " + command.volt, 1, MessageEvent.MessageTypes.Log, MessageEvent.MessageCategories.RFSG));
+                        else
+                            Console.WriteLine("{0} Second exception caught.", e);
+                        AtticusServer.server.messageLog(this, new MessageEvent("ZIHF command to set voltage gave error.", 1, MessageEvent.MessageTypes.Log, MessageEvent.MessageCategories.RFSG));
+                    }
                     break;
                 case RFSGCommand.CommandType.EnableOutput:
                     try
@@ -412,10 +524,23 @@ namespace AtticusServer
             }
         }
 
-
         public bool providerTimerFinished(int priority)
         {
             return true;
+        }
+        public static string AddNewlineCharacters(string input)
+        {
+            if (input == null)
+                return null;
+            return input.Replace("\\n", "\n").Replace("\\r", "\r");
+        }
+
+        [DllImport("setpointPID0.dll")]
+        public static extern void SetPtPID(double value);
+
+        public static void CallSetPtPID(double value)
+        {
+            SetPtPID(value);
         }
 
     }

@@ -21,7 +21,10 @@ namespace InstrumentDriverInterop.Ivi
         
         private bool _disposed = true;
         
-        ~niRFSG(){Dispose(false);}
+        ~niRFSG()
+        {
+            Dispose(false);
+        }
 
         /// <summary>
         /// Initializes the NI-RFSG device.

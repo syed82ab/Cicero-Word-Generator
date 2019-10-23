@@ -102,8 +102,8 @@ namespace DataStructures
                 return 1;
             }
 
-            private enum TypeEnum { raw_string, voltage_frequency_waveform, string_param_string };
-            private static readonly string[] names = new string[] { "Raw", "A+F Ramp", "Parameter" };
+            private enum TypeEnum { raw_string, voltage_frequency_waveform, string_param_string, setpoint };
+            private static readonly string[] names = new string[] { "Raw", "A+F Ramp", "Parameter", "ZIHF PID0 setpoint" };
 
             private GpibChannelDataType(TypeEnum myType)
             {
@@ -115,8 +115,9 @@ namespace DataStructures
             public static readonly GpibChannelDataType raw_string = new GpibChannelDataType(TypeEnum.raw_string);
             public static readonly GpibChannelDataType voltage_frequency_waveform = new GpibChannelDataType(TypeEnum.voltage_frequency_waveform);
             public static readonly GpibChannelDataType string_param_string = new GpibChannelDataType(TypeEnum.string_param_string);
+            public static readonly GpibChannelDataType setpoint = new GpibChannelDataType(TypeEnum.setpoint);
 
-            public static readonly GpibChannelDataType[] allTypes = new GpibChannelDataType[] { raw_string, voltage_frequency_waveform, string_param_string };
+            public static readonly GpibChannelDataType[] allTypes = new GpibChannelDataType[] { raw_string, voltage_frequency_waveform, string_param_string, setpoint };
 
             public override string ToString()
             {
