@@ -138,6 +138,31 @@ namespace WordGenerator.Controls
                     }
 
                 }
+                else if (groupChannelData.DataType == GPIBGroupChannelData.GpibChannelDataType.lockenable)
+                {
+                    rawStringTextBox.Enabled = false;
+                    rawStringTextBox.Visible = false;
+                    spsFlowLayoutPanel.Visible = true;
+
+
+                    if (groupChannelData.StringParameterStrings == null)
+                    {
+                        groupChannelData.StringParameterStrings = new List<StringParameterString>();
+                        groupChannelData.StringParameterStrings.Add(new StringParameterString());
+                    }
+
+                    foreach (StringParameterString sps in groupChannelData.StringParameterStrings)
+                    {
+                        StringParameterStringEditor spse = new StringParameterStringEditor(sps);
+
+                        spse.insertAbove += new Action<StringParameterString>(spse_insertAbove);
+                        spse.insertBelow += new Action<StringParameterString>(spse_insertBelow);
+                        spse.delete += new Action<StringParameterString>(spse_delete);
+
+                        spsFlowLayoutPanel.Controls.Add(spse);
+                    }
+
+                }
             }
 		    else
 		    {

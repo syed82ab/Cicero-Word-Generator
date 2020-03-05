@@ -52,6 +52,24 @@
             //PInvoke.TestForError(this._handle, pInvokeResult);
             return pInvokeResult;
         }
+        public int TogglePID1(IntPtr ZIconn, int value)
+        {
+            int pInvokeResult = PInvoke.TogglePID1(ZIconn, value);
+            return pInvokeResult;
+
+        }
+        public int GetPID1(IntPtr ZIconn, double value)
+        {
+            int pInvokeResult = PInvoke.GetPID1(ZIconn, value);
+            return pInvokeResult;
+        }
+        /*
+       public int EnablePID1(IntPtr ZIconn)
+        {
+            int pInvokeResult = PInvoke.EnablePID1(ZIconn);
+            return pInvokeResult;
+
+        }*/
         public void Disconnect(IntPtr ZIconn)
         {
             PInvoke.Disconnect(ZIconn);
@@ -93,15 +111,21 @@
             [DllImport("setpointPID1.dll", EntryPoint = "ziSetValueD", CallingConvention = CallingConvention.StdCall)]
             public static extern int SetD(IntPtr conn, double value);
 
+            [DllImport("setpointPID1.dll", EntryPoint = "ziGetPID1", CallingConvention = CallingConvention.StdCall)]
+            public static extern int GetPID1(IntPtr conn, double value);
+
 
             [DllImport("setpointPID1.dll", EntryPoint = "ziSyncSetValueD", CallingConvention = CallingConvention.StdCall)]
             public static extern int SyncSetD(IntPtr conn, double value);
 
+            [DllImport("setpointPID1.dll", EntryPoint = "ziTogglePID1", CallingConvention = CallingConvention.StdCall)]
+            public static extern int TogglePID1(IntPtr conn, int value);
+          
             [DllImport("setpointPID1.dll", EntryPoint = "ziDisconnect", CallingConvention = CallingConvention.StdCall)]
             public static extern void Disconnect(IntPtr conn);
             [DllImport("setpointPID1.dll", EntryPoint = "ziDestroy", CallingConvention = CallingConvention.StdCall)]
             public static extern void Destroy(IntPtr conn);
-
+            
       
 
         }   

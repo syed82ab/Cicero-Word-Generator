@@ -28,13 +28,14 @@ namespace AtticusServer
         public IntPtr ziconn;
         private struct RFSGCommand
         {
-            public enum CommandType { AmplitudeFrequency, EnableOutput, DisableOutput, Initiate, Abort, SetPIDSetPt };
+            public enum CommandType { AmplitudeFrequency, EnableOutput, DisableOutput, Initiate, Abort, SetPIDSetPt, ToggleLock};
             public CommandType commandType;
 
             public double frequency;
             public double amplitude;
             public double volt;
-                
+            public int pidenabled;
+
             /// <summary>
             /// time, in ticks (100ns intervals. 10 ticks = 1us. 10000 = 1ms) at which command is to be output, relative to
             /// sequence start
@@ -242,6 +243,26 @@ namespace AtticusServer
                     //commandBuffer.Add(com);
 
                 }
+                else if (channelData.DataType == GPIBGroupChannelData.GpibChannelDataType.lockenable)
+                {
+
+                    if (channelData.StringParameterStrings != null)
+                    {
+                        string str = "";
+                        foreach (StringParameterString sps in channelData.StringParameterStrings)
+                            str = sps.ToString();
+
+                        RFSGCommand com = new RFSGCommand();
+                        com.commandType = RFSGCommand.CommandType.ToggleLock;
+                        com.pidenabled = Convert.ToInt32(str);
+                        com.commandTime = currentTime + postTime;
+                        commandBuffer.Add(com);
+
+                    }
+                    //com.commandTime = currentTime + postTime;
+                    //commandBuffer.Add(com);
+
+                }
 
                 currentTime += seconds_to_ticks(currentStep.StepDuration.getBaseValue());
             }
@@ -431,8 +452,7 @@ namespace AtticusServer
                             AtticusServer.server.messageLog(this, new MessageEvent("Error setting set voltage " + command.volt + ". Trying again.", 1, MessageEvent.MessageTypes.Log, MessageEvent.MessageCategories.RFSG));
                             retval = ziHF.SyncSetD(ziconn, val);
                             Console.WriteLine("Return value after second set is {0}" , retval);
-                        }
-
+                        }                                            
                     }
                     catch (Exception e)
                     {
@@ -445,6 +465,34 @@ namespace AtticusServer
                         AtticusServer.server.messageLog(this, new MessageEvent("ZIHF command to set voltage gave error.", 1, MessageEvent.MessageTypes.Log, MessageEvent.MessageCategories.RFSG));
                     }
                     break;
+                case RFSGCommand.CommandType.ToggleLock:
+                    try
+                    {
+                        int val = command.pidenabled;
+                        int retval = ziHF.TogglePID1(ziconn, val);
+                        if (retval == 0)
+                        {
+                            if (val == 0)
+                                AtticusServer.server.messageLog(this, new MessageEvent("Disabled lock"));
+                            else if(val==1)
+                                AtticusServer.server.messageLog(this, new MessageEvent("Enabled lock"));
+                            else
+                                AtticusServer.server.messageLog(this, new MessageEvent("Undefined procedure"));
+
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        AtticusServer.server.messageLog(this, new MessageEvent("Exception", 1, MessageEvent.MessageTypes.Log, MessageEvent.MessageCategories.RFSG));
+
+                        if (success)
+                            AtticusServer.server.messageLog(this, new MessageEvent("ZIHF commanded to set enabled " + command.pidenabled, 1, MessageEvent.MessageTypes.Log, MessageEvent.MessageCategories.RFSG));
+                        else
+                            Console.WriteLine("{0} Second exception caught.", e);
+                        AtticusServer.server.messageLog(this, new MessageEvent("ZIHF command to set enable gave error.", 1, MessageEvent.MessageTypes.Log, MessageEvent.MessageCategories.RFSG));
+                    }
+                    break;
+
                 case RFSGCommand.CommandType.EnableOutput:
                     try
                     {
