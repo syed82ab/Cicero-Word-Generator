@@ -160,16 +160,16 @@ NAG_DLL_EXPIMP void NAG_CALL ziDestroy(ZIConnection conn) {
 
 	return;
 }
-NAG_DLL_EXPIMP int NAG_CALL ziGetPID1(ZIConnection conn, ZIDoubleData value) {
+NAG_DLL_EXPIMP int NAG_CALL ziGetPID1(ZIConnection conn, ZIDoubleData* value) {
 
-	retVal = ziAPIGetValueD(conn, "/dev574/pids/0/", &value);
+	retVal = ziAPIGetValueD(conn, "/dev574/pids/0/setpoint", value);
 	if (retVal != ZI_INFO_SUCCESS) {
 		ziAPIGetError(retVal, &errBuffer, NULL);
 		fprintf(stderr, "Can't get parameter: %s\n", errBuffer);
 	}
 	else
 	{
-		fprintf(stderr, "value of /dev574/pids/0/setpoint is %f\n", value);
+		fprintf(stderr, "value of /dev574/pids/0/setpoint is %f\n", *value);
 	}
 		return retVal;
 }

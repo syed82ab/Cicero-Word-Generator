@@ -26,6 +26,7 @@ namespace AtticusServer
 
       
         public IntPtr ziconn;
+         
         private struct RFSGCommand
         {
             public enum CommandType { AmplitudeFrequency, EnableOutput, DisableOutput, Initiate, Abort, SetPIDSetPt, ToggleLock};
@@ -436,23 +437,35 @@ namespace AtticusServer
                     try
                     {
                         double val = command.volt;
+                        double currval=0;
+
                         unsafe { 
                         Console.WriteLine("ziconn is {0}", ziconn);
-                    }
-
-                        int retval = ziHF.SyncSetD(ziconn, val);
-                        if (retval == 0)
+                        
+                        int retval0 = ziHF.GetPID1(ziconn, ref currval);
+                       
+                            Console.WriteLine("Current setpoint is {0}", currval);
+                        }
+                        if (Math.Abs(currval - val) > 0.000001)
                         {
-                            AtticusServer.server.messageLog(this, new MessageEvent("Wrote setpoint data : " + val));
-                            AtticusServer.server.messageLog(this, new MessageEvent("ZIHF2 commanded to set voltage " + command.volt, 1, MessageEvent.MessageTypes.Log, MessageEvent.MessageCategories.RFSG));
+                            int retval = ziHF.SyncSetD(ziconn, val);
+                            if (retval == 0)
+                            {
+                                AtticusServer.server.messageLog(this, new MessageEvent("Wrote setpoint data : " + val));
+                                AtticusServer.server.messageLog(this, new MessageEvent("ZIHF2 commanded to set voltage " + command.volt, 1, MessageEvent.MessageTypes.Log, MessageEvent.MessageCategories.RFSG));
+                            }
+                            else
+                            {
+
+                                AtticusServer.server.messageLog(this, new MessageEvent("Error setting set voltage " + command.volt + ". Trying again.", 1, MessageEvent.MessageTypes.Log, MessageEvent.MessageCategories.RFSG));
+                                retval = ziHF.SyncSetD(ziconn, val);
+                                Console.WriteLine("Return value after second set is {0}", retval);
+                            }
                         }
                         else
                         {
-                            
-                            AtticusServer.server.messageLog(this, new MessageEvent("Error setting set voltage " + command.volt + ". Trying again.", 1, MessageEvent.MessageTypes.Log, MessageEvent.MessageCategories.RFSG));
-                            retval = ziHF.SyncSetD(ziconn, val);
-                            Console.WriteLine("Return value after second set is {0}" , retval);
-                        }                                            
+                            Console.WriteLine("current val and val are equal.");
+                        }
                     }
                     catch (Exception e)
                     {

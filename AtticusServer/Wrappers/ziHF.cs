@@ -58,9 +58,9 @@
             return pInvokeResult;
 
         }
-        public int GetPID1(IntPtr ZIconn, double value)
+        public int GetPID1(IntPtr ZIconn, ref double value)
         {
-            int pInvokeResult = PInvoke.GetPID1(ZIconn, value);
+            int pInvokeResult = PInvoke.GetPID1(ZIconn, ref value);
             return pInvokeResult;
         }
         /*
@@ -112,7 +112,7 @@
             public static extern int SetD(IntPtr conn, double value);
 
             [DllImport("setpointPID1.dll", EntryPoint = "ziGetPID1", CallingConvention = CallingConvention.StdCall)]
-            public static extern int GetPID1(IntPtr conn, double value);
+            public static extern int GetPID1(IntPtr conn, ref double value);
 
 
             [DllImport("setpointPID1.dll", EntryPoint = "ziSyncSetValueD", CallingConvention = CallingConvention.StdCall)]
