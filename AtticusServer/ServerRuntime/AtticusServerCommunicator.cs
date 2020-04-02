@@ -1365,14 +1365,27 @@ namespace AtticusServer
                             }
                             else if (channelData.DataType == GPIBGroupChannelData.GpibChannelDataType.setpoint)
                             {
-                                
-                                
-                              
-                                string str="";
-                                foreach (StringParameterString sps in channelData.StringParameterStrings)
-                                    str = sps.ToString();
 
-                                val = Convert.ToDouble(str);
+
+                                string str = "";
+                                double val2 = 0;
+                                double val = 0;
+                                double multiplier = 1;
+                                foreach (StringParameterString sps in channelData.StringParameterStrings)
+                                {
+                                    str = sps.ToString();
+                                    val2 = Convert.ToDouble(sps.Parameter.ToString());
+                                    string unit = sps.Postfix.ToString();
+                                    if (unit == "u")
+                                        multiplier = 1e-6;
+                                    else if (unit == "m")
+                                        multiplier = 1e-3;
+                                    else
+                                        multiplier = 1;
+                                }
+                                val = val2 * multiplier;
+                                
+                                //val = Convert.ToDouble(str);
                                 //CallziInit(ref conn);
                                 //CallziConnect(conn);
                                 //CallziSetValueD(conn, val);

@@ -226,16 +226,28 @@ namespace AtticusServer
                 }
                 else if (channelData.DataType == GPIBGroupChannelData.GpibChannelDataType.setpoint)
                 {
-                    
+
                     if (channelData.StringParameterStrings != null)
                     {
-                        string str ="";
-                        foreach (StringParameterString sps in channelData.StringParameterStrings)
-                            str = sps.ToString();
 
                         RFSGCommand com = new RFSGCommand();
                         com.commandType = RFSGCommand.CommandType.SetPIDSetPt;
-                        com.volt = Convert.ToDouble(str);
+                        string str = "";
+                        double val = 0;
+                        double multiplier=1;
+                        foreach (StringParameterString sps in channelData.StringParameterStrings) { 
+                        str = sps.ToString();
+                        val = Convert.ToDouble(sps.Parameter.ToString());
+                            string unit = sps.Postfix;
+                            if (unit == "u")
+                                multiplier = 1e-6;
+                            else if (unit == "m")
+                                multiplier = 1e-3;
+                            else
+                                multiplier = 1;
+                        }
+                        com.volt = val * multiplier;
+                        /*com.volt = Convert.ToDouble(str);*/
                         com.commandTime = currentTime + postTime;
                         commandBuffer.Add(com);
                         
