@@ -1999,6 +1999,9 @@ namespace AtticusServer
 
                     messageLog(this, new MessageEvent("Triggers generated. Sequence running."));
 
+					//Wait for the task to complete in another thread so the UI
+					//does not freeze.
+					ThreadPool.QueueUserWorkItem(new WaitCallback(WaitMethod));
                     return true;
                 }
                 catch (Exception e)
@@ -3032,6 +3035,13 @@ namespace AtticusServer
         {
             ziDestroy(conn);
             return;
+        }
+		
+        private void WaitMethod(Object obj)
+        {
+            task.WaitUntilDone(-1);
+            task.Stop();
+            task.Dispose();
         }
     }
 }
