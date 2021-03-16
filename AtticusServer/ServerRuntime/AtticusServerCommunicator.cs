@@ -1085,7 +1085,7 @@ namespace AtticusServer
                 {
                     foreach (long time in taskFinishTimeClicks)
                     {
-                        if ((eventTime - time) > 10000000)
+                        if ((eventTime - time) > 50000000)
                         {
                             earlyFinishDetected = true;
                         }
@@ -1998,7 +1998,27 @@ namespace AtticusServer
                     }
 
                     messageLog(this, new MessageEvent("Triggers generated. Sequence running."));
+                    
+                    /* Look for HW triggered dev and set WaitUntilDone */
+                    foreach (string dev in myServerSettings.myDevicesSettings.Keys)
+                    {
+                        if (daqMxTasks.ContainsKey(dev))
+                        {
+                            DeviceSettings ds = myServerSettings.myDevicesSettings[dev];
 
+                            if ((ds.StartTriggerType == DeviceSettings.TriggerType.TriggerIn))
+                            {
+                                Task task = daqMxTasks[dev];
+
+                                /* Since we only have one HW triggered device, we wait until the task to be done before continuing. Software triggered should be done first I think
+                                 * */
+                                task.WaitUntilDone(100000); /* 100 s*/
+                                messageLog(this, new MessageEvent("***** Wait Until Done done *****"));
+
+
+                            }
+                        }
+                    }
                     return true;
                 }
                 catch (Exception e)
