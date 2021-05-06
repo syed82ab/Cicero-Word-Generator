@@ -98,6 +98,8 @@ namespace DataStructures
         public abstract bool runSuccess();
 
 
+        public abstract bool runFinished();
+
         public abstract string getServerName();
 
         public abstract bool ping();

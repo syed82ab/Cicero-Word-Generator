@@ -1000,6 +1000,28 @@ namespace AtticusServer
 
         public bool clientFinishedRun;
 
+        public override bool runFinished()
+        {
+            foreach (string str in daqMxTasks.Keys)
+            {
+                Task task = daqMxTasks[str];
+                try
+                {
+                    task.WaitUntilDone();
+                    if (task.IsDone)
+                    {
+                        messageLog(this, new MessageEvent("Task done"));
+                    }
+                }
+                catch (Exception e)
+                {
+                    messageLog(this, new MessageEvent("Unable to give buffer status of task " + str + ": " + e.Message));
+                }
+            }
+
+            return (!taskErrorsDetected);
+        }
+
         public override bool runSuccess()
         {
             long eventTime = DateTime.Now.Ticks;
@@ -1138,6 +1160,23 @@ namespace AtticusServer
             }
         }
 
+        private Dictionary<HardwareChannel, NationalInstruments.VisaNS.TcpipSession> tcpipSessions;
+
+        private NationalInstruments.VisaNS.TcpipSession getTCPIPSession(HardwareChannel hc)
+        {
+
+            if (tcpipSessions == null)
+                tcpipSessions = new Dictionary<HardwareChannel, NationalInstruments.VisaNS.TcpipSession>();
+
+            if (!tcpipSessions.ContainsKey(hc))
+            {
+                NationalInstruments.VisaNS.TcpipSession device = (NationalInstruments.VisaNS.TcpipSession)NationalInstruments.VisaNS.ResourceManager.GetLocalManager().Open(hc.ChannelName, NationalInstruments.VisaNS.AccessModes.LoadConfig, 100);
+                tcpipSessions.Add(hc, device);
+            }
+
+            return tcpipSessions[hc];
+        }
+
         private Dictionary<HardwareChannel, NationalInstruments.VisaNS.SerialSession> serialSessions;
 
         private NationalInstruments.VisaNS.SerialSession getSerialSession(HardwareChannel hc)
@@ -1186,6 +1225,11 @@ namespace AtticusServer
             {
                 serialSessions.Clear();
             }
+            if (tcpipSessions != null)
+            {
+                tcpipSessions.Clear();
+            }
+
         }
 
 
@@ -1447,8 +1491,24 @@ namespace AtticusServer
                             RS232GroupChannelData channelData = rs232Group.ChannelDatas[channelID];
                             if (channelData.DataType == RS232GroupChannelData.RS232DataType.Raw)
                             {
-                                NationalInstruments.VisaNS.SerialSession ss = getSerialSession(hc);
-                                ss.Write(RS232Task.AddNewlineCharacters(channelData.RawString));
+                                if (hc.ChannelDescription.Contains("TCIP"))
+                                {
+
+                                    messageLog(this, new MessageEvent("TCIP device "));
+                                    NationalInstruments.VisaNS.TcpipSession ss = getTCPIPSession(hc);
+                                    ss.Write(RS232Task.AddNewlineCharacters(channelData.RawString));
+                                }
+                                //else if (hc.ChannelDescription.Contains("USB"))
+                                //{
+                                //    NationalInstruments.VisaNS.UsbSession ss = getSerialSession(hc);
+                                //}
+                                else
+                                {
+                                    NationalInstruments.VisaNS.SerialSession ss = getSerialSession(hc);
+                                    ss.Write(RS232Task.AddNewlineCharacters(channelData.RawString));
+                                }
+
+                               
                                 messageLog(this, new MessageEvent("Wrote rs232 command " + channelData.RawString));
                             }
                             else if (channelData.DataType == RS232GroupChannelData.RS232DataType.Parameter)
@@ -1483,7 +1543,6 @@ namespace AtticusServer
                     return false;
                 }
 
-                return true;
             }
         }
 
@@ -1500,8 +1559,14 @@ namespace AtticusServer
         /// sets up the software-timed task triggering mechanism, if one is in use.
         /// </summary>
         /// <returns></returns>
+        /// 
+
+
+
+        private DigitalSingleChannelReader myDigitalReader;
         public override bool armTasks(UInt32 clockID)
         {
+
             lock (remoteLockObj)
             {
                 try
@@ -1592,7 +1657,7 @@ namespace AtticusServer
                                     {
                                         messageLog(this, new MessageEvent("***** You are using SampleClockEvent as your SoftwareTaskTriggerMethod (in your ServerSettings). This is not recommended and no longer supported. Use PollBufferPosition instead. *****"));
                                         displayError();
-                                        /*
+                                        /*  
                                         lock (softwareTriggeringTaskLock)
                                         {
                                             softwareTriggeringTask = task;
@@ -1603,6 +1668,15 @@ namespace AtticusServer
                                         return false;
                                     }
                                 }
+                                //if (ds.StartTriggerType == DeviceSettings.TriggerType.TriggerIn && ds.DeviceDescription.Contains("6535"))
+                                //{
+                                //   // task.SynchronizeCallbacks.("dev2/line1/port0", "");
+                                //    //task.DOChannels.CreateChannel("/dev2/line1/port0", "", ChannelLineGrouping.OneChannelForAllLines);
+                                //    task.Timing.ConfigureChangeDetection("/dev2/port1/line0", "", SampleQuantityMode.ContinuousSamples,200);
+                                //    task.DigitalChangeDetection += new DigitalChangeDetectionEventHandler(myTask_DigitalChangeDetection); /* Event handler to read chage detection*/
+                                //    messageLog(this, new MessageEvent("Event handler for change detetction created on task"));
+                                //    myDigitalReader = new DigitalSingleChannelReader(task.Stream);
+                                //}
 
                                 task.Start();
 
@@ -2012,8 +2086,9 @@ namespace AtticusServer
 
                                 /* Since we only have one HW triggered device, we wait until the task to be done before continuing. Software triggered should be done first I think
                                  * */
-                                task.WaitUntilDone(100000); /* 100 s*/
-                                messageLog(this, new MessageEvent("***** Wait Until Done done *****"));
+                                
+                               // task.WaitUntilDone(100000); /* 100 s*/
+                               // messageLog(this, new MessageEvent("***** Wait Until Done done *****"));
 
 
                             }
@@ -2031,6 +2106,22 @@ namespace AtticusServer
 
         }
 
+        private void myTask_DigitalChangeDetection(object sender, DigitalChangeDetectionEventArgs e)
+        {
+            try
+            {
+                bool[] data = myDigitalReader.ReadSingleSampleMultiLine();
+                messageLog(this, new MessageEvent("Triggered." + data));
+
+            }
+            catch (Exception ex)
+            {
+
+                messageLog(this, new MessageEvent("Unable to trigger. " + ex.Message + ex.StackTrace));
+                displayError();
+                
+            }
+        }
 
         public override bool setSequence(SequenceData sequence)
         {
@@ -2761,6 +2852,24 @@ namespace AtticusServer
 
                                 ss.Dispose();
 
+                            }
+                            else if(hType == NationalInstruments.VisaNS.HardwareInterfaceType.Tcpip)
+                            {
+                                NationalInstruments.VisaNS.TcpipSession ts = (NationalInstruments.VisaNS.TcpipSession)NationalInstruments.VisaNS.ResourceManager.GetLocalManager().Open(s);
+
+                                string description = ts.HardwareInterfaceName;
+                                HardwareChannel hc = new HardwareChannel(this.serverSettings.ServerName, "Serial", s, description, HardwareChannel.HardwareConstants.ChannelTypes.rs232);
+                                if (!serverSettings.ExcludedChannels.Contains(hc))
+                                {
+                                    MyHardwareChannels.Add(hc);
+                                }
+                                if (!detectedDevices.Contains("Serial"))
+                                {
+                                    detectedDevices.Add("Serial");
+                                    myDeviceDescriptions.Add("Serial", "All local TCIP devices.");
+                                }
+
+                                ts.Dispose();
                             }
                         }
                         catch (Exception e)

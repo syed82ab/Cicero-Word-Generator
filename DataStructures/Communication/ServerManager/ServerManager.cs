@@ -658,6 +658,11 @@ namespace DataStructures
             return runNamedMethodOnConnectedServers("runSuccess", null, 4000, messageLog);
         }
 
+        public ServerActionStatus getRunFinishedOnConnectedServers(EventHandler<MessageEvent> messageLog)
+        {
+            return runNamedMethodOnConnectedServers("runFinished", null, 4000, messageLog);
+        }
+
         public ServerActionStatus setNextRunTimestampOnConnectedServers(DateTime timeStamp, EventHandler<MessageEvent> messageLog)
         {
             return runNamedMethodOnConnectedServers("nextRunTimeStamp", new object[] { timeStamp }, 4000, messageLog);
@@ -752,6 +757,7 @@ namespace DataStructures
             temp.outputRS232Group(null, null);
             temp.outputSingleTimestep(null, null);
             temp.ping();
+            temp.runFinished();
             temp.runSuccess();
             temp.setSequence(null);
             temp.setSettings(null);

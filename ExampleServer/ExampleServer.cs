@@ -90,6 +90,11 @@ namespace Virgil
             return true;
         }
 
+        public override bool runFinished()
+        {
+            return true;
+        }
+
         public override bool setSequence(SequenceData sequence)
         {
             return true;

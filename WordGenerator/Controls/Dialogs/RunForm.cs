@@ -1044,6 +1044,7 @@ namespace WordGenerator
                 MainClientForm.instance.CurrentlyOutputtingTimestep = sequence.dwellWord();
 
 
+                actionStatus = Storage.settingsData.serverManager.getRunFinishedOnConnectedServers(addMessageLogText);
 
                 actionStatus = Storage.settingsData.serverManager.getRunSuccessOnConnectedServers(addMessageLogText);
                 if (actionStatus != ServerManager.ServerActionStatus.Success)

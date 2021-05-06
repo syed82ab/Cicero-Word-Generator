@@ -809,6 +809,10 @@ namespace AtticusServer
                     DigitalEdgeStartTriggerEdge.Rising);
 
             }
+            if (deviceName.Contains("dev2"))
+            {
+            }
+            //task.DigitalChangeDetection.
 
             task.Control(TaskAction.Verify);
             task.Control(TaskAction.Commit);
